@@ -2,12 +2,13 @@ package io.github.cuprumz.mapper;
 
 import io.github.cuprumz.enums.ShapeName;
 import io.github.cuprumz.pojo.Shape;
-import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.util.List;
 
 /**
  * @author cuprumz
@@ -26,7 +27,15 @@ public class ShapeMapperTest {
         shapeMapper.insert(new Shape(ShapeName.RECTANGLE, 1.1f, 1.1f));
         shapeMapper.insert(new Shape(ShapeName.TRIANGLE, 1.1f, 1.1f));
         shapeMapper.insert(new Shape(ShapeName.ROUND, 1.1f, 1.1f));
+    }
 
-        Assert.assertEquals(4, shapeMapper.getAll().size());
+    @Test
+    public void testQuery() throws Exception {
+        List<Shape> users = shapeMapper.getAll();
+        if(users==null || users.size()==0){
+            System.out.println("is null");
+        }else{
+            System.out.println(users.toString());
+        }
     }
 }
