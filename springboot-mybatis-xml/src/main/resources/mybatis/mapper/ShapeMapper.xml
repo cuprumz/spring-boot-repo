@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="io.github.cuprumz.mapper">
+
+  <sql id="list">
+    id, shape_name shapeName, area, perimeter
+  </sql>
+
+  <select id="getAll" resultType="Shape">
+    select <include refid="list"></include> from shape
+  </select>
+
+  <select id="getUserByID" resultType="Shape">
+    select <include refid="list"></include> from shape where id = #{id}
+  </select>
+
+  <insert id="insert" parameterType="Shape">
+    INSERT INTO
+       		shape
+       		(shape_name, area, perimeter)
+       	VALUES
+       		(#{shapeName}, #{area}, #{perimeter})
+  </insert>
+
+  <update id="update" parameterType="io.github.cuprumz.pojo.Shape" >
+    UPDATE
+    shape
+    SET
+    <if test="shapeName != null">shape_name = #{shapeName},</if>
+    <if test="area != null">area = #{area},</if>
+    <if test="perimeter != null">perimeter = #{perimeter},</if>
+    WHERE
+    id = #{id}
+  </update>
+
+  <delete id="deleteByID" parameterType="java.lang.Long">
+    DELETE FROM
+       shape
+    WHERE
+       id =#{id}
+  </delete>
+
+</mapper>
