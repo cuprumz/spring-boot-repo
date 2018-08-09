@@ -5,6 +5,7 @@
 # gradle
 .gradle/
 out/
+build/
 !gradle-wrapper.jar
 
 # Compiled class file
