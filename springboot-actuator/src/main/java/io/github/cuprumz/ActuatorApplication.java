@@ -2,17 +2,15 @@ package io.github.cuprumz;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.mybatis.spring.annotation.MapperScan;
 
 /**
- * @author cuprum
- * @date 2018/08/07
+ * @author cuprumz
+ * @date 2018/08/11
  */
 @SpringBootApplication
-@MapperScan("io.github.cuprumz.mapper")
-public class Application {
+public class ActuatorApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(ActuatorApplication.class, args);
     }
 }

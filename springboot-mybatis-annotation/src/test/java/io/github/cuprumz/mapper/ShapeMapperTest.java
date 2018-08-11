@@ -27,6 +27,7 @@ public class ShapeMapperTest {
         shapeMapper.insert(new Shape(ShapeName.RECTANGLE, 1.1f, 1.1f));
         shapeMapper.insert(new Shape(ShapeName.TRIANGLE, 1.1f, 1.1f));
         shapeMapper.insert(new Shape(ShapeName.ROUND, 1.1f, 1.1f));
+        shapeMapper.insert(new Shape(ShapeName.LOVE, 1.1f, 1.1f));
     }
 
     @Test
