@@ -16,7 +16,7 @@ public interface ShapeMapper {
 
     void insert(Shape shape);
 
-    Shape getUserByID(Long id);
+    Shape getShapeByID(Long id);
 
     List<Shape> getAll();
 }

@@ -10,7 +10,7 @@
     select <include refid="list"></include> from shape
   </select>
 
-  <select id="getUserByID" resultType="Shape">
+  <select id="getShapeByID" resultType="Shape">
     select <include refid="list"></include> from shape where id = #{id}
   </select>
 
