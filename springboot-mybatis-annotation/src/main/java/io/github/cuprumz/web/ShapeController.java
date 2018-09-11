@@ -19,14 +19,14 @@ public class ShapeController {
     @Autowired
     private ShapeMapper shapeMapper;
 
-    @RequestMapping("/getusers")
+    @RequestMapping("/getshapes")
     public List<Shape> getUserLists() {
         return shapeMapper.getAll();
     }
 
-    @RequestMapping("/getuser/{id}")
+    @RequestMapping("/getshape/{id}")
     public Shape getUser(@PathVariable Long id) {
-        return shapeMapper.getUserByID(id);
+        return shapeMapper.getShapeByID(id);
     }
 
     @RequestMapping("/add")

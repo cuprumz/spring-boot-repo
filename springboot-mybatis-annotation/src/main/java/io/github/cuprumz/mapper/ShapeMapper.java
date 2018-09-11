@@ -24,7 +24,7 @@ public interface ShapeMapper {
     void insert(Shape shape);
 
     @Select("select id, shape_name shapeName, area, perimeter from shape where id = #{id}")
-    Shape getUserByID(Long id);
+    Shape getShapeByID(Long id);
 
     @Select("select id, shape_name shapeName, area, perimeter from shape")
     List<Shape> getAll();
