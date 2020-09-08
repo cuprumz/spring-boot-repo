@@ -31,4 +31,21 @@ public class HelloAspect {
 
         return obj;
     }
+
+    public Object aroundMethod(ProceedingJoinPoint pjp) {
+        Object result = null;
+        String methodName = pjp.getSignature().getName();
+        System.out.println("------c-u-p-r-u-m------  @Before  methodName = " + methodName);
+
+        try {
+            result = pjp.proceed();
+            System.out.println("------c-u-p-r-u-m------  @AfterRunning  methodName = " + methodName);
+        } catch (Throwable throwable) {
+            throwable.printStackTrace();
+            System.out.println("------c-u-p-r-u-m------  @AfterThrowing  methodName = " + methodName);
+        }
+        System.out.println("------c-u-p-r-u-m------  @after  methodName = " + methodName);
+
+        return result;
+    }
 }
