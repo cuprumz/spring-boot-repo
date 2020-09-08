@@ -1,0 +1,14 @@
+spring:
+  data:
+    rest:
+      base-path: /api
+  datasource:
+    driver-class-name: org.sqlite.JDBC
+    url: jdbc:sqlite:test.db
+    username:
+    password:
+  jpa:
+    database-platform: io.github.cuprumz.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
