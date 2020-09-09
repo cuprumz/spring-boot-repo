@@ -3,6 +3,9 @@ package io.github.cuprumz.pojo;
 import io.github.cuprumz.enums.ShapeName;
 
 import java.io.Serializable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 
 /**
  * @author cuprum
@@ -19,8 +22,11 @@ import java.io.Serializable;
  PRIMARY KEY (`id`)
  ) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8;
  */
+@Entity
 public class Shape implements Serializable {
     private static final long serialVersionUID = 1L;
+    @Id
+    @GeneratedValue
     private Long id;
     private ShapeName shapeName;
     private Float area;
