@@ -1,18 +1,15 @@
 package io.github.cuprumz;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
 import io.github.cuprumz.dao.AccountRepository;
 import io.github.cuprumz.model.Account;
 import io.github.cuprumz.service.AccountService;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 public class TransactionTest {
@@ -42,10 +39,11 @@ public class TransactionTest {
         accountRepository.save(source);
         accountRepository.save(target);
         assertEquals(init, accountRepository.findById(1L).get().getBalance(), "ok");
+        assertEquals(init, accountRepository.findById(2L).get().getBalance(), "ok");
     }
 
     @Test
-    @Transactional(propagation=Propagation.REQUIRED)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void test1() {
         Account source = accountRepository.findById(1L).get(), target = accountRepository.findById(2L).get();
 
