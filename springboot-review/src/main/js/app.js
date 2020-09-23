@@ -7,6 +7,7 @@ const when = require('when');
 const client = require('./client');
 const follow = require('./follow');
 
+const stompClient = require('./websocket-listener')
 
 const root = '/api'
 
@@ -19,6 +20,7 @@ class App extends React.Component {
       attributes: [],
       pageSize: 2,
       links: {},
+      page: 1,
     }
   }
 
@@ -62,6 +64,10 @@ class App extends React.Component {
         return employeeCollection;
       });
     }).then(employeeCollection => {
+      console.log(employeeCollection);
+      /** event */
+      this.page = employeeCollection.entity.page;
+      /** event end */
       return employeeCollection.entity._embedded.employees.map(employee =>
         client({
           method: 'GET',
@@ -72,6 +78,9 @@ class App extends React.Component {
       return when.all(employeePromises);
     }).done(employees => {
       this.setState({
+        /** event */
+        page: this.page,
+        /** event end */
         employees: employees,
         attributes: Object.keys(this.schema.properties),
         pageSize,
@@ -81,7 +90,7 @@ class App extends React.Component {
   }
   /** end conditional */
 
-  /** conditional */
+  /** hypermedia */
   // onCreate = (newEmployee) => {
   //   follow(client, root, ['employees']).then(employeeCollection => {
   //     return client({
@@ -102,8 +111,32 @@ class App extends React.Component {
   //     }
   //   });
   // };
+  /** end hypermedia */
+
+  /** conditional */
+  // onCreate = (newEmployee) => {
+  //   follow(client, root, ['employees']).then(response => {
+  //     return client({
+  //       method: 'POST',
+  //       path: response.entity._links.self.href,
+  //       entity: newEmployee,
+  //       headers: {'Content-Type': 'application/json'}
+  //     })
+  //   }).then(response => {
+  //     return follow(client, root [
+  //       {rel: 'employees', params: {'size': this.state.pageSize}}
+  //       ]);
+  //   }).done(response => {
+  //     if (typeof response.entity._links.last !== 'undefined') {
+  //       this.onNavigate(response.entity._links.last.href);
+  //     } else {
+  //       this.onNavigate(response.entity._links.self.href);
+  //     }
+  //   })
+  // }
   /** end conditional */
 
+  /** event */
   onCreate = (newEmployee) => {
     follow(client, root, ['employees']).then(response => {
       return client({
@@ -112,27 +145,30 @@ class App extends React.Component {
         entity: newEmployee,
         headers: {'Content-Type': 'application/json'}
       })
-    }).then(response => {
-      return follow(client, root [
-        {rel: 'employees', params: {'size': this.state.pageSize}}
-        ]);
-    }).done(response => {
-      if (typeof response.entity._links.last !== 'undefined') {
-        this.onNavigate(response.entity._links.last.href);
-      } else {
-        this.onNavigate(response.entity._links.self.href);
-      }
     })
   }
+  /** event end */
 
+
+  /** conditional */
+  // onDelete = (employee) => {
+  //   client({
+  //     method: 'DELETE',
+  //     path: employee.entity._links.self.href,
+  //   }).done(response => {
+  //     this.loadFromServer(this.state.pageSize);
+  //   });
+  // };
+  /** conditional end */
+
+  /** event */
   onDelete = (employee) => {
     client({
       method: 'DELETE',
-      path: employee._links.self.href,
-    }).done(response => {
-      this.loadFromServer(this.state.pageSize);
+      path: employee.entity._links.self.href,
     });
-  };
+  }
+  /** event end */
 
   /** conditional */
   // onNavigate = (navUri) => {
@@ -156,6 +192,9 @@ class App extends React.Component {
       path: navUri,
     }).then(employeeCollection => {
       this.links = employeeCollection.entity._links;
+      /** event */
+      this.page = employeeCollection.entity.page;
+      /** event end */
       return employeeCollection.entity._embedded.employees.map(employee =>
         client({
           method: 'GET',
@@ -166,6 +205,9 @@ class App extends React.Component {
       return when.all(employeePromises);
     }).done(employees => {
       this.setState({
+        /** event */
+        page: this.page,
+        /** event end */
         employees,
         attributes: Object.keys(this.schema.properties),
         pageSize: this.state.pageSize,
@@ -184,9 +226,13 @@ class App extends React.Component {
         'If-Match': employee.headers.Etag
       }
     }).done(response => {
-      this.loadFromServer(this.state.pageSize);
+      /** conditional */
+      // this.loadFromServer(this.state.pageSize);
+      /** conditional end */
+
+      /* Let the websocket handler update the state */
     }, response => {
-      if (response.state.code == 412) {
+      if (response.status.code === 412) {
         alert('DENIED: Unable to update ' +
           employee.entity._links.self.href + '. Your copy is stable.');
       }
@@ -199,6 +245,48 @@ class App extends React.Component {
     }
   }
 
+  /** event */
+  refreshAndGoToLastPage = (msg) => {
+    follow(client, root, [
+      {rel: 'employees', params: {size: this.state.pageSize}}
+    ]).done(response => {
+      if (response.entity._links.last !== undefined) {
+        this.onNavigate(response.entity._links.last.href);
+      } else {
+        this.onNavigate(response.entity._links.self.href);
+      }
+    })
+  }
+  /** event end */
+
+  /** event */
+  refreshCurrentPage = (msg) => {
+    follow(client, root, [
+      {rel: 'employees', params: {size: this.state.pageSize, page: this.state.page.number}}
+    ]).then(employeeCollection => {
+      this.links = employeeCollection.entity._links;
+      this.page = employeeCollection.entity.page;
+
+      return employeeCollection.entity._embedded.employees.map(employee => {
+        return client({
+          method: 'GET',
+          path: employee._links.self.href,
+        })
+      });
+    }).then(employeePromises => {
+      return when.all(employeePromises);
+    }).then(employees => {
+      this.setState({
+        page: this.page,
+        employees,
+        attributes: Object.keys(this.schema.properties),
+        pageSize: this.state.pageSize,
+        links: this.links,
+      });
+    });
+  }
+
+  /** event end */
 
   componentDidMount() {
     /** basic */
@@ -208,6 +296,14 @@ class App extends React.Component {
     /** end basic */
 
     this.loadFromServer(this.state.pageSize)
+
+    /** event */
+    stompClient.register([ // /topic it it a common convention that indicates pub-sub semantics
+      {route: '/topic/newEmployee', callback: this.refreshAndGoToLastPage},
+      {route: '/topic/updateEmployee', callback: this.refreshCurrentPage},
+      {route: '/topic/deleteEmployee', callback: this.refreshCurrentPage},
+    ]);
+    /** event end */
   }
 
   render() {
@@ -218,6 +314,7 @@ class App extends React.Component {
           onCreate={this.onCreate}
         />
         <EmployeeList
+          page={this.state.page}
           employees={this.state.employees}
           links={this.state.links}
           pageSize={this.state.pageSize}
@@ -263,6 +360,12 @@ class EmployeeList extends React.Component {
   }
 
   render() {
+    /** event */
+    const pageInfo = this.props.page.hasOwnProperty("number") ?
+      <h3>Employees - Page {this.props.page.number + 1} of {this.props.page.totalPages}</h3>
+      : null;
+    /** event end */
+
     const employees = this.props.employees.map(employee =>
       <Employee
         key={employee.entity._links.self.href}
@@ -288,6 +391,7 @@ class EmployeeList extends React.Component {
 
     return (
       <div>
+        {pageInfo}
         <input ref="pageSize" defaultValue={this.props.pageSize} onInput={this.handleInput}/>
         <table>
           <tbody>
@@ -400,7 +504,7 @@ class UpdateDialog extends React.Component {
 
   render() {
     const inputs = this.props.attributes.map(attribute =>
-      <p key={this.props.employee.entity[attribute]}>
+      <p key={attribute}>
         <input type="text" placeholder={attribute}
                defaultValue={this.props.employee.entity[attribute]}
                ref={attribute} className="field"/>
@@ -412,12 +516,14 @@ class UpdateDialog extends React.Component {
       <div key={this.props.employee.entity._links.self.href}>
         <a href={"#" + dialogId}>Update</a>
         <div id={dialogId} className="modalDialog">
-          <a href="#" title="Close" className="close">X</a>
-          <h2>Update an employee</h2>
-          <form>
-            {inputs}
-            <button onClick={this.handleSubmit}>Update</button>
-          </form>
+          <div>
+            <a href="#" title="Close" className="close">X</a>
+            <h2>Update an employee</h2>
+            <form>
+              {inputs}
+              <button onClick={this.handleSubmit}>Update</button>
+            </form>
+          </div>
         </div>
       </div>
     );
